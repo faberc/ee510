@@ -70,14 +70,34 @@ def GetDemoImages():
     images.append(GetImpulseImage())
     images.append(GetTestImage())
     images.append(GetChirpImage())
-    images.append(cv.imread('DarkTree.jpeg',cv.IMREAD_GRAYSCALE)[:101,:101])
-    images.append(cv.imread('Bubble.jpeg',cv.IMREAD_GRAYSCALE))
+    images.append(cv.imread('DarkTree.jpeg',cv.IMREAD_GRAYSCALE)[:151,:151])
+    images.append(cv.imread('Bubble.jpeg',cv.IMREAD_GRAYSCALE)[1001:2000,251:1250])
     scaledImages = list()
     for image in images: # Convert to standard scale of 0-1
         im = image.copy().astype(np.float32)
         im = im/im.max() 
         scaledImages.append(im)
     return(scaledImages)
+def GetMinEigenvalues(image,blockSize=3):
+    scale  = 1
+    delta  = 0
+    kSize  = 3 # Must be 1, 3, 5, or 7
+    ddepth = cv.CV_64F
+    
+    imageDx  = cv.Sobel(image, ddepth, 1, 0, ksize=kSize, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
+    imageDy  = cv.Sobel(image, ddepth, 0, 1, ksize=kSize, scale=scale, delta=delta, borderType=cv.BORDER_DEFAULT)
+    
+    A = imageDx**2
+    B = imageDy**2
+    C = imageDx*imageDy
+
+    kernel = (blockSize,blockSize)
+    A = cv.GaussianBlur(A,kernel,0)
+    B = cv.GaussianBlur(B,kernel,0)
+    C = cv.GaussianBlur(C,kernel,0)
+
+    lambdaMin = abs(((A+B) - np.sqrt((A-B)**2 + 4*C**2))/2)       
+    return(lambdaMin)
 def Kernel(t,t0,kernelType='Sinc',parameter=np.nan):
     td = t - t0
     if kernelType=='Sinc':
