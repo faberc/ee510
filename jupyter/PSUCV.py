@@ -225,3 +225,35 @@ def KernelInterpolate(image,ri,ci,kernelType='Binomial5'):
             z += image[ir,ic]*Kernel(ri,ir,kernelType=kernelType)
         zi += z*Kernel(ci,ic,kernelType=kernelType)
     return(zi)
+def GetParabolaVertex(x1,x2,x3,y1,y2,y3):
+    '''Given three pairs of (x,y) points return the vertex of the
+         parabola passing through the points. Vectorized and common expression reduced.'''
+    # https://stackoverflow.com/questions/717762/how-to-calculate-the-vertex-of-a-parabola-given-three-points
+    #Define a sequence of sub expressions to reduce redundant flops
+    x0 = 1/x2
+    x4 = x1 - x2
+    x5 = 1/x4
+    x6 = x1**2
+    x7 = 1/x6
+    x8 = x2**2
+    x9 = -x7*x8 + 1
+    x10 = x0*x1*x5*x9
+    x11 = 1/x1
+    x12 = x3**2
+    x13 = x11*x12
+    x14 = 1/(x0*x13 - x0*x3 - x11*x3 + 1)
+    x15 = x14*y3
+    x16 = x10*x15
+    x17 = x0*x5
+    x18 = -x13 + x3
+    x19 = y2*(x1*x17 + x14*x18*x6*x9/(x4**2*x8))
+    x20 = x2*x5
+    x21 = x11*x20
+    x22 = x14*(-x12*x7 + x18*x21)
+    x23 = y1*(-x10*x22 - x21)
+    x24 = x16/2 - x19/2 - x23/2
+    x25 = -x17*x9 + x7
+    x26 = x0*x1*x14*x18*x5
+    x27 = 1/(-x15*x25 + y1*(x20*x7 - x22*x25 + x7) + y2*(-x17 + x25*x26))
+    x28 = x24*x27
+    return x28,x15 + x22*y1 + x24**2*x27 - x26*y2 + x28*(-x16 + x19 + x23)
